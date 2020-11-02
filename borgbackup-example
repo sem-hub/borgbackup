@@ -3,6 +3,8 @@
 export BORG_BACKUP_URL="ssh://user@example.com"
 # If the base path is not specified using ~user/$hostname
 export BORG_BASE_PATH=\~/backups/borg
+# Pass phrase is empty for me
+export BORG_PASSPHRASE=''
 
 # $HOME is /usr/home for FreeBSD
 export BORG_HOME_PATH=/usr/home

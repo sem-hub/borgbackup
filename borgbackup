@@ -18,7 +18,9 @@ BORG_BACKUP_PATH=$BORG_BASE_PATH/$BORG_HOSTNAME
 export BORG_REPO=$BORG_BACKUP_URL/$BORG_BACKUP_PATH
 info "Using repo: $BORG_REPO"
 # See the section "Passphrase notes" for more infos.
-export BORG_PASSPHRASE=''
+if [ -z ${BORG_PASSPHRASE+x} ]; then
+	export BORG_PASSPHRASE=''
+fi
 
 hostname=`hostname`
 now=`date +%Y%m%d-%H%M`
