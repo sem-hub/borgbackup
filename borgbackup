@@ -69,7 +69,7 @@ borg create \
 	--exclude '/var/log/\*' \
 	--exclude '$BORG_HOME_PATH/\*/backups/\*' \
 	$BORG_LOCAL_EXCLUDES \
-	::'{hostname}-{now}' \
+	::'{fqdn}-{now}' \
 	/etc \
 	$BORG_HOME_PATH \
 	/var \
