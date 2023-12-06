@@ -1,0 +1,57 @@
+#!/bin/sh
+
+# Define DEFAULT_HOST if you backup only one
+#DEFAULT_ARG=borgbackup-host
+#  or
+#DEFAULT_ARGS=backupuser@backup-host
+
+if [ -z "$DEFAULT_ARG" -a -z "$1" ]; then
+	echo "Run as: $0 [<user>@]<hostname>"
+	exit 1
+fi
+
+if [ -z "$1" ]; then
+	ARG=$DEFAULT_ARG
+else
+	ARG=$1
+fi
+
+DEFAULT_USER="borgbackup"
+
+if [ "$ARG" = "${ARG%"@"*}" ]; then
+	USER=$DEFAULT_USER
+	NET_PATH="${USER}@$ARG"
+	HOST=$ARG
+else
+	USER="${ARG%"@"*}"
+	NET_PATH=$ARG
+	HOST="${ARG#*"@"}"
+fi
+
+export BORG_USER=$USER
+export BORG_HOSTNAME=$HOST
+
+export BORG_BACKUP_URL="ssh://${NET_PATH}"
+# Default: BORG_BASE_PATH=BORG_HOME_PATH/BORG_USER
+export BORG_BASE_PATH="~/backups/borg"
+# No passphrase means no archive encryption
+export BORG_PASSPHRASE=''
+
+# $HOME is /usr/home for FreeBSD
+export BORG_HOME_PATH=/usr/home
+
+# *** EDIT THIS BELOW FOR YOUR HOST SPECIFIC ***
+# Excludes and Includes for this host
+export BORG_LOCAL_EXCLUDES=" \
+export BORG_LOCAL_EXCLUDES=" \
+	--exclude '/var/db/freebsd-update/*' \
+	--exclude '/var/db/portsnap/*' \
+	--exclude '$BORG_HOME_PATH/*/nobackup/*' \
+"
+
+export BORG_LOCAL_INCLUDES="\
+	/usr/local/etc \
+"
+
+# set where you put borgbackup script
+sudo -E ~/bin/borgbackup

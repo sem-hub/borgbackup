@@ -12,18 +12,42 @@ if [ -z ${BORG_HOME_PATH+x} ]; then
 	# Linux default
 	BORG_HOME_PATH=/home
 fi
-BORG_HOSTNAME=`hostname -s`
-BORG_BACKUP_PATH=$BORG_BASE_PATH/$BORG_HOSTNAME
+if [ -z ${BORG_BASE_PATH+x} ]; then
+	BORG_BASE_PATH="${BORG_HOME_PATH}/${BORG_USER}"
+fi
+
+SHORT_HOSTNAME=`hostname -s`
+BORG_BACKUP_PATH=$BORG_BASE_PATH/$SHORT_HOSTNAME
 # Setting this, so the repo does not need to be given on the commandline:
-export BORG_REPO=$BORG_BACKUP_URL/$BORG_BACKUP_PATH
+export BORG_REPO=${BORG_BACKUP_URL}/${BORG_BACKUP_PATH}
 info "Using repo: $BORG_REPO"
 # See the section "Passphrase notes" for more infos.
 if [ -z ${BORG_PASSPHRASE+x} ]; then
 	export BORG_PASSPHRASE=''
 fi
 
-hostname=`hostname`
-now=`date +%Y%m%d-%H%M`
+info "Check passwordless access..."
+ssh -o PasswordAuthentication=no -o ChallengeResponseAuthentication=no ${BORG_USER}@${BORG_HOSTNAME} /usr/bin/true
+
+if [ $? -ne 0 ]; then
+	info "Error: no passwordless access to ${BORG_HOSTNAME}"
+	exit 1
+
+fi
+info "OK"
+
+info "Check repository existing..."
+ssh ${BORG_USER}@${BORG_HOSTNAME} "ls $BORG_BACKUP_PATH &>/dev/null"
+
+if [ $? -ne 0 ]; then
+	info "Repository does not exist. Create it"
+	borg init -e none "$BORG_REPO"
+	if [ $? != 0 ]; then
+		info "Error: Repository creating error"
+		exit 1
+	fi
+fi
+info "OK"
 
 info "Starting backup"
 
@@ -45,7 +69,7 @@ borg create \
 	--exclude '/var/log/\*' \
 	--exclude '$BORG_HOME_PATH/\*/backups/\*' \
 	$BORG_LOCAL_EXCLUDES \
-	::$hostname-$now \
+	::'{hostname}-{now}' \
 	/etc \
 	$BORG_HOME_PATH \
 	/var \
@@ -56,13 +80,13 @@ backup_exit=$?
 info "Pruning repository"
 
 # Use the `prune` subcommand to maintain 7 daily, 4 weekly and 6 monthly
-# archives of THIS machine. The '{hostname}-' prefix is very important to
+# archives of THIS machine. The '{hostname}-*' matching is very important to
 # limit prune's operation to this machine's archives and not apply to
 # other machines' archives also:
 
 borg prune \
 	--list \
-	--prefix $hostname- \
+	--glob-archives '{hostname}-*' \
 	--show-rc \
 	--keep-daily 7 \
 	--keep-weekly 4 \
@@ -70,15 +94,24 @@ borg prune \
 
 prune_exit=$?
 
+# actually free repo disk space by compacting segments
+
+info "Compacting repository"
+
+borg compact
+
+compact_exit=$?
+
 # use highest exit code as global exit code
 global_exit=$(( backup_exit > prune_exit ? backup_exit : prune_exit ))
+global_exit=$(( compact_exit > global_exit ? compact_exit : global_exit ))
 
 if [ ${global_exit} -eq 0 ]; then
-	info "Backup and Prune finished successfully"
+    info "Backup, Prune, and Compact finished successfully"
 elif [ ${global_exit} -eq 1 ]; then
-	info "Backup and/or Prune finished with warnings"
+    info "Backup, Prune, and/or Compact finished with warnings"
 else
-	info "Backup and/or Prune finished with errors"
+    info "Backup, Prune, and/or Compact finished with errors"
 fi
 
 exit ${global_exit}
