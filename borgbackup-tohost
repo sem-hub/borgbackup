@@ -43,7 +43,6 @@ export BORG_HOME_PATH=/usr/home
 # *** EDIT THIS BELOW FOR YOUR HOST SPECIFIC ***
 # Excludes and Includes for this host
 export BORG_LOCAL_EXCLUDES=" \
-export BORG_LOCAL_EXCLUDES=" \
 	--exclude '/var/db/freebsd-update/*' \
 	--exclude '/var/db/portsnap/*' \
 	--exclude '$BORG_HOME_PATH/*/nobackup/*' \
