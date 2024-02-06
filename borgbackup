@@ -72,7 +72,7 @@ borg create \
 	::'{fqdn}-{now}' \
 	/etc \
 	$BORG_HOME_PATH \
-	/var \
+	/var/spool \
 	$BORG_LOCAL_INCLUDES
 
 backup_exit=$?
