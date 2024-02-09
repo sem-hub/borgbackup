@@ -63,7 +63,7 @@ borg create \
 	--stats \
 	--show-rc \
 	--compression lzma,5 \
-	--noatime --noctime \
+	--noctime \
 	--chunker-params=buzhash,10,23,16,4095 \
 	--exclude-caches \
 	--exclude '$BORG_HOME_PATH/\*/.cache/\*' \
