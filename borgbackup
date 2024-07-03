@@ -41,7 +41,7 @@ ssh ${BORG_USER}@${BORG_HOSTNAME} "ls $BORG_BACKUP_PATH &>/dev/null"
 
 if [ $? -ne 0 ]; then
 	info "Repository does not exist. Create it"
-	borg init -e none "$BORG_REPO"
+	borg init --encryption none --make-parent-dirs "$BORG_REPO"
 	if [ $? != 0 ]; then
 		info "Error: Repository creating error"
 		exit 1
