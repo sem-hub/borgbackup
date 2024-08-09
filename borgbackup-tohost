@@ -52,5 +52,6 @@ export BORG_LOCAL_INCLUDES="\
 	/usr/local/etc \
 "
 
-# set where you put borgbackup script
+# We must be root to run the script to get access to all files we backup.
+# set borgbackup script path
 sudo -E ~/bin/borgbackup

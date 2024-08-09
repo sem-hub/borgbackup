@@ -26,6 +26,9 @@ if [ -z ${BORG_PASSPHRASE+x} ]; then
 	export BORG_PASSPHRASE=''
 fi
 
+# NOTE: if you have problems here, keep in mind the script runs as root. So, you must have access to the host
+#       from root not your common user. Easiest way to do so, set IdentityFile to user key in
+#       /root/.ssh/config file.
 info "Check passwordless access..."
 ssh -o PasswordAuthentication=no -o ChallengeResponseAuthentication=no ${BORG_USER}@${BORG_HOSTNAME} /usr/bin/true
 
