@@ -5,6 +5,8 @@
 #  or
 #DEFAULT_ARGS=backupuser@backup-host
 
+BORG_RUN_PATH=$( dirname $0 )
+
 if [ -z "$DEFAULT_ARG" -a -z "$1" ]; then
 	echo "Run as: $0 [<user>@]<hostname>"
 	exit 1
@@ -17,6 +19,10 @@ else
 fi
 
 DEFAULT_USER="borgbackup"
+# You can override some variables to put them in borgbackup.local
+if [ -f $BORG_RUN_PATH/borgbackup.local ]; then
+	. $BORG_RUN_PATH/borgbackup.local
+fi
 
 if [ "$ARG" = "${ARG%"@"*}" ]; then
 	USER=$DEFAULT_USER
@@ -37,20 +43,11 @@ export BORG_BASE_PATH="~/backups/borg"
 # No passphrase means no archive encryption
 export BORG_PASSPHRASE=''
 
-# $HOME is /usr/home for FreeBSD
-export BORG_HOME_PATH=/usr/home
-
-# *** EDIT THIS BELOW FOR YOUR HOST SPECIFIC ***
+# *** DON'T EDIT THIS BELOW. INSTEAD PUT THIS VARIABLES IN borgbackup.local ***
 # Excludes and Includes for this host
-export BORG_LOCAL_EXCLUDES=" \
-	--exclude '/var/db/freebsd-update/*' \
-	--exclude '/var/db/portsnap/*' \
-	--exclude '$BORG_HOME_PATH/*/nobackup/*' \
-"
+export BORG_LOCAL_EXCLUDES=${BORG_LOCAL_EXCLUDES:-""}
 
-export BORG_LOCAL_INCLUDES="\
-	/usr/local/etc \
-"
+export BORG_LOCAL_INCLUDES=${BORG_LOCAL_INCLUDES:-""}
 
 # We must be root to run the script to get access to all files we backup.
 # set borgbackup script path
