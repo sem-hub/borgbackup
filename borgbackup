@@ -71,6 +71,7 @@ borg create \
 	--noctime \
 	--chunker-params=buzhash,10,23,16,4095 \
 	--exclude-caches \
+	--exclude-if-present .nobackup \
 	--exclude '$BORG_HOME_PATH/\*/.cache/\*' \
 	--exclude '/var/cache/\*' \
 	--exclude '/var/tmp/\*' \
