@@ -9,4 +9,5 @@ want to run it directly. Use next script instead:
 **borgbackup-tohost** gets username@host as an argument, set some environment
 variables and run **borgbackup** script with sudo (you need sudo to access ALL
 files).
-Edit it for your system, especially BORG_LOCAL_INCLUDES and BORG_LOCAL_EXCLUDES.
+You can create borgbackup.local and but there your own variables especially
+BORG_LOCAL_INCLUDES and BORG_LOCAL_EXCLUDES.
