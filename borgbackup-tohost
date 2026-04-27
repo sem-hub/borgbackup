@@ -7,48 +7,50 @@
 
 BORG_RUN_PATH=$( dirname $0 )
 
-if [ -z "$DEFAULT_ARG" -a -z "$1" ]; then
-	echo "Run as: $0 [<user>@]<hostname>"
+if [ -z "$DEFAULT_ARG" -a -z "$*" ]; then
+	echo "Run as: $0 [<user>@]<hostname>..."
 	exit 1
 fi
 
-if [ -z "$1" ]; then
-	ARG=$DEFAULT_ARG
+if [ -z "$*" ]; then
+	ARGS=$DEFAULT_ARG
 else
-	ARG=$1
+	ARGS=$*
 fi
 
-DEFAULT_USER="borgbackup"
-# You can override some variables to put them in borgbackup.local
-if [ -f $BORG_RUN_PATH/borgbackup.local ]; then
-	. $BORG_RUN_PATH/borgbackup.local
-fi
+for ARG in $ARGS; do
+	DEFAULT_USER="borgbackup"
+	# You can override some variables to put them in borgbackup.local
+	if [ -f $BORG_RUN_PATH/borgbackup.local ]; then
+		. $BORG_RUN_PATH/borgbackup.local
+	fi
 
-if [ "$ARG" = "${ARG%"@"*}" ]; then
-	USER=$DEFAULT_USER
-	NET_PATH="${USER}@$ARG"
-	HOST=$ARG
-else
-	USER="${ARG%"@"*}"
-	NET_PATH=$ARG
-	HOST="${ARG#*"@"}"
-fi
+	if [ "$ARG" = "${ARG%"@"*}" ]; then
+		USER=$DEFAULT_USER
+		NET_PATH="${USER}@$ARG"
+		HOST=$ARG
+	else
+		USER="${ARG%"@"*}"
+		NET_PATH=$ARG
+		HOST="${ARG#*"@"}"
+	fi
 
-export BORG_USER=$USER
-export BORG_HOSTNAME=$HOST
+	export BORG_USER=$USER
+	export BORG_HOSTNAME=$HOST
 
-export BORG_BACKUP_URL="ssh://${NET_PATH}"
-# Default: BORG_BASE_PATH=BORG_HOME_PATH/BORG_USER
-export BORG_BASE_PATH="~/backups/borg"
-# No passphrase means no archive encryption
-export BORG_PASSPHRASE=''
+	export BORG_BACKUP_URL="ssh://${NET_PATH}"
+	# Default: BORG_BASE_PATH=BORG_HOME_PATH/BORG_USER
+	export BORG_BASE_PATH="~/backups/borg"
+	# No passphrase means no archive encryption
+	export BORG_PASSPHRASE=''
 
-# *** DON'T EDIT THIS BELOW. INSTEAD PUT THIS VARIABLES IN borgbackup.local ***
-# Excludes and Includes for this host
-export BORG_LOCAL_EXCLUDES=${BORG_LOCAL_EXCLUDES:-""}
+	# *** DON'T EDIT THIS BELOW. INSTEAD PUT THIS VARIABLES IN borgbackup.local ***
+	# Excludes and Includes for this host
+	export BORG_LOCAL_EXCLUDES=${BORG_LOCAL_EXCLUDES:-""}
 
-export BORG_LOCAL_INCLUDES=${BORG_LOCAL_INCLUDES:-""}
+	export BORG_LOCAL_INCLUDES=${BORG_LOCAL_INCLUDES:-""}
 
-# We must be root to run the script to get access to all files we backup.
-# set borgbackup script path
-sudo -E ~/bin/borgbackup
+	# We must be root to run the script to get access to all files we backup.
+	# set borgbackup script path
+	sudo -E ~/bin/borgbackup
+done
