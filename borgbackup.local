@@ -1,0 +1,6 @@
+# Every directory in BORG_LOCAL_EXLUDES must be prefixed with --exclude
+BORG_LOCAL_EXCLUDES=" \
+	--exclude \*/tmp\* \
+	--exclude /var/log
+"
+BORG_LOCAL_INCLUDES="$HOME"
