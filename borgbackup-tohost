@@ -42,7 +42,7 @@ for ARG in $ARGS; do
 	# Default: BORG_BASE_PATH=BORG_HOME_PATH/BORG_USER
 	export BORG_BASE_PATH="~/backups/borg"
 	# No passphrase means no archive encryption
-	export BORG_PASSPHRASE=''
+	export BORG_PASSPHRASE=${BORG_PASSPHRASE:-""}
 
 	# *** DON'T EDIT THIS BELOW. INSTEAD PUT THIS VARIABLES IN borgbackup.local ***
 	# Excludes and Includes for this host
